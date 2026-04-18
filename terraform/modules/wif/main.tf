@@ -11,7 +11,8 @@ resource "google_iam_workload_identity_pool_provider" "provider" {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
 
-  attribute_condition = "attribute.repository == '${var.github_repo}'"
+  #attribute_condition = "attribute.repository == '${var.github_repo}'"
+  attribute_condition = "attribute.repository == 'roshanyadav01/microservices-gcp'"
   attribute_mapping = {
     "google.subject"       = "assertion.sub"
     "attribute.repository" = "assertion.repository"
