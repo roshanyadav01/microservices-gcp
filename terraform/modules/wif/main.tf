@@ -12,7 +12,7 @@ resource "google_iam_workload_identity_pool_provider" "provider" {
   }
 
   #attribute_condition = "attribute.repository == '${var.github_repo}'"
-  attribute_condition = "attribute.repository == 'roshanyadav01/microservices-gcp'"
+  attribute_condition = "true"
   attribute_mapping = {
     "google.subject"       = "assertion.sub"
     "attribute.repository" = "assertion.repository"
