@@ -31,6 +31,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Debug WIF
+        run: |
+          echo "WIF_PROVIDER='${{ secrets.WIF_PROVIDER }}'"
+
       # OIDC Auth (NO JSON KEY)
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -65,9 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Debug WIF
-        run: |
-          echo "WIF_PROVIDER='${{ secrets.WIF_PROVIDER }}'"
+
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
