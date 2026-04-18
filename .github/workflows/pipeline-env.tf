@@ -45,7 +45,9 @@ jobs:
         run: |
           cd terraform/envs/${{ matrix.env }}
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve \
+            -var="project_id=${{ secrets.GCP_PROJECT }}" \
+            -var="github_repo=${{ github.repository }}"
 
 # -----------------------------------
 # 2. Build & Push (Parallel Services)
@@ -57,6 +59,8 @@ jobs:
     strategy:
       matrix:
         service: [user, payment, order]
+
+    environment: dev
 
     steps:
       - uses: actions/checkout@v3
@@ -139,8 +143,8 @@ jobs:
       - name: Get GKE Credentials
         uses: google-github-actions/get-gke-credentials@v2
         with:
-          cluster_name: microservices-cluster
-          location: us-central1
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.REGION }}
 
       - name: Scale Deployments
         run: |
@@ -171,8 +175,8 @@ jobs:
       - name: Get GKE Credentials
         uses: google-github-actions/get-gke-credentials@v2
         with:
-          cluster_name: microservices-cluster
-          location: us-central1
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.REGION }}
 
       - name: Verify Pods
         run: |

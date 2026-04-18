@@ -10,6 +10,7 @@ permissions:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
   REGION: us-central1
   CLUSTER_NAME: microservices-cluster
   REPO: microservices
@@ -40,7 +41,8 @@ jobs:
           cd terraform
           terraform init
           terraform apply -auto-approve \
-            -var="project_id=$PROJECT_ID" \
+            -var="project_id=${{ env.PROJECT_ID }}" \
+            -var="project_number=${{ env.PROJECT_NUMBER }}" \
             -var="github_repo=${{ github.repository }}"
 
   build:
