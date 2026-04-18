@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "WIF_PROVIDER='${{ secrets.WIF_PROVIDER }}'"
 
-      # OIDC Auth (NO JSON KEY)
+/*      # OIDC Auth (NO JSON KEY)
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
