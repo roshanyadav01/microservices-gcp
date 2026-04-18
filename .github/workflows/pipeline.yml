@@ -36,7 +36,7 @@ jobs:
         with:
           #workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           #with:
-          workload_identity_provider: projects/404208010161/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          workload_identity_provider: projects/404208010161/locations/global/workloadIdentityPools/github-pool1/providers/github-provider1
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v2
