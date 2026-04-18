@@ -31,6 +31,7 @@ resource "google_project_service" "services" {
     "container.googleapis.com",
     "iam.googleapis.com",
     "sts.googleapis.com"
+    "cloudresourcemanager.googleapis.com"
   ])
 
   project = var.project_id
