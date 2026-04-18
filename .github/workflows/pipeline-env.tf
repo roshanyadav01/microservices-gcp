@@ -65,11 +65,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Debug WIF
+        run: |
+          echo "WIF_PROVIDER='${{ secrets.WIF_PROVIDER }}'"
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
 
       - name: Configure Docker
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
