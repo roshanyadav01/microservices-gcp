@@ -30,7 +30,7 @@ resource "google_project_service" "services" {
     "compute.googleapis.com",
     "container.googleapis.com",
     "iam.googleapis.com",
-    "sts.googleapis.com"
+    "sts.googleapis.com",
     "cloudresourcemanager.googleapis.com"
   ])
 
