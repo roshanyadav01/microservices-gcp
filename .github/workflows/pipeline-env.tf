@@ -1,48 +1,55 @@
-name: GCP Microservices CI/CD
+name: GCP Microservices Multi-Env CI/CD
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 permissions:
   id-token: write
   contents: read
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   REGION: us-central1
-  CLUSTER_NAME: microservices-cluster
   REPO: microservices
+  CLUSTER_NAME: microservices-cluster
 
 jobs:
 
+# -----------------------------------
+# 1. Terraform (Per Environment)
+# -----------------------------------
   terraform:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        env: [dev]
+        env: [dev, uat, prod]
 
     environment: ${{ matrix.env }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: google-github-actions/auth@v3
+      # OIDC Auth (NO JSON KEY)
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - uses: hashicorp/setup-terraform@v3
-
-      - run: |
-          cd terraform
+      - name: Terraform Init & Apply
+        run: |
+          cd terraform/envs/${{ matrix.env }}
           terraform init
-          terraform apply -auto-approve \
-            -var="project_id=$PROJECT_ID" \
-            -var="github_repo=${{ github.repository }}"
+          terraform apply -auto-approve
 
+# -----------------------------------
+# 2. Build & Push (Parallel Services)
+# -----------------------------------
   build:
     needs: terraform
     runs-on: ubuntu-latest
@@ -52,46 +59,121 @@ jobs:
         service: [user, payment, order]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: google-github-actions/auth@v3
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
 
-      - run: gcloud auth configure-docker $REGION-docker.pkg.dev
+      - name: Build & Push Image
+        run: |
+          IMAGE=$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/$REPO/${{ matrix.service }}:${{ github.sha }}
+          
+          docker build -t $IMAGE ./services/${{ matrix.service }}
+          docker push $IMAGE
 
-      - run: |
-          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }} ./services/${{ matrix.service }}
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
-
+# -----------------------------------
+# 3. Deploy (Per Env + Parallel Services)
+# -----------------------------------
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
+        env: [dev, uat, prod]
         service: [user, payment, order]
 
-    steps:
-      - uses: actions/checkout@v4
+    environment: ${{ matrix.env }}
 
-      - uses: google-github-actions/auth@v3
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
-      - uses: google-github-actions/setup-gcloud@v2
-
-      - uses: google-github-actions/get-gke-credentials@v3
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: ${{ env.CLUSTER_NAME }}
           location: ${{ env.REGION }}
 
-      - run: |
+      - name: Helm Deploy
+        run: |
+          IMAGE_REPO=$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/$REPO/${{ matrix.service }}
+
           helm upgrade --install ${{ matrix.service }} ./helm/${{ matrix.service }} \
-            --set image.repository=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }} \
+            --set image.repository=$IMAGE_REPO \
             --set image.tag=${{ github.sha }} \
-            --namespace prod --create-namespace
+            --namespace ${{ matrix.env }} \
+            --create-namespace
+
+# -----------------------------------
+# 4. Rollout (Scale after Deploy)
+# -----------------------------------
+  rollout:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        env: [dev, uat, prod]
+
+    environment: ${{ matrix.env }}
+
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: microservices-cluster
+          location: us-central1
+
+      - name: Scale Deployments
+        run: |
+          kubectl scale deploy user --replicas=2 -n ${{ matrix.env }}
+          kubectl scale deploy payment --replicas=2 -n ${{ matrix.env }}
+          kubectl scale deploy order --replicas=2 -n ${{ matrix.env }}
+
+# -----------------------------------
+# 5. Verify
+# -----------------------------------
+  verify:
+    needs: rollout
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        env: [dev, uat, prod]
+
+    environment: ${{ matrix.env }}
+
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: microservices-cluster
+          location: us-central1
+
+      - name: Verify Pods
+        run: |
+          kubectl get pods -n ${{ matrix.env }}
