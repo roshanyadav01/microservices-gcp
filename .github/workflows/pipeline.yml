@@ -41,9 +41,7 @@ jobs:
           cd terraform/env/${{ matrix.env }}
           terraform init
           terraform apply -auto-approve \
-            -var="project_id=${{ env.PROJECT_ID }}" \
-            -var="project_number=${{ env.PROJECT_NUMBER }}" \
-            -var="github_repo=${{ github.repository }}"
+            -var-file="${{ matrix.env }}.tfvars"
 
   build:
     needs: terraform
