@@ -38,7 +38,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
 
       - run: |
-          cd terraform
+          cd terraform/env/${{ matrix.env }}
           terraform init
           terraform apply -auto-approve \
             -var="project_id=${{ env.PROJECT_ID }}" \
