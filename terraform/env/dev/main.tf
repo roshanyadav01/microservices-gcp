@@ -27,13 +27,13 @@ module "artifact" {
   region = var.region
 }
 
-module "gke" {
+/*module "gke" {
   source     = "../../modules/gke"
   region     = var.region
   network    = module.network.network_name
   subnetwork = module.network.subnet_name
 }
-
+*/
 module "wif" {
   source      = "../../modules/wif"
   project_id  = var.project_id
