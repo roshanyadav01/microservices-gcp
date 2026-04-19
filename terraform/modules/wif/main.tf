@@ -10,12 +10,12 @@ resource "google_iam_workload_identity_pool_provider" "provider" {
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
-
-  attribute_condition = "attribute.repository == '${var.github_repo}'"
   attribute_mapping = {
     "google.subject"       = "assertion.sub"
     "attribute.repository" = "assertion.repository"
   }
+  attribute_condition = "attribute.repository == '${var.github_repo}'"
+
   depends_on = [google_iam_workload_identity_pool.pool]
 }
 
