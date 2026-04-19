@@ -39,6 +39,13 @@ resource "google_project_service" "services" {
   disable_on_destroy = false
 }
 
+resource "google_artifact_registry_repository_iam_member" "writer" {
+  location   = "us-central1"
+  repository = "microservices"
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.sa.email}"
+}
+
 resource "google_project_iam_member" "roles" {
   for_each = toset([
     "roles/container.admin",
