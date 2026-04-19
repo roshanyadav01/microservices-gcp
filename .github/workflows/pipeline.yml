@@ -62,7 +62,10 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - run: gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+      - run: |
+          echo "Logging into Artifact Registry with access token"
+          gcloud auth print-access-token | \
+          docker login -u oauth2accesstoken --password-stdin https://$REGION-docker.pkg.dev
 
       - run: |
           IMAGE_NAME=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
