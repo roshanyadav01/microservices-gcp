@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: google-github-actions/auth@v3
+      - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
@@ -46,6 +46,7 @@ jobs:
   build:
     needs: terraform
     runs-on: ubuntu-latest
+    environment: dev
 
     strategy:
       matrix:
@@ -54,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: google-github-actions/auth@v3
+      - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
@@ -70,6 +71,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment: dev
 
     strategy:
       matrix:
@@ -78,14 +80,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: google-github-actions/auth@v3
+      - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - uses: google-github-actions/get-gke-credentials@v3
+      - uses: google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: ${{ env.CLUSTER_NAME }}
           location: ${{ env.REGION }}
@@ -94,4 +96,4 @@ jobs:
           helm upgrade --install ${{ matrix.service }} ./helm/${{ matrix.service }} \
             --set image.repository=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }} \
             --set image.tag=${{ github.sha }} \
-            --namespace prod --create-namespace
+            --namespace dev --create-namespace
