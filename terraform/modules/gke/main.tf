@@ -12,6 +12,10 @@ resource "google_container_cluster" "gke" {
 
   lifecycle {
     prevent_destroy = true
+    ignore_changes = [
+      node_config,
+      initial_node_count,
+    ]
   }
 
 }
