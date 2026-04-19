@@ -58,6 +58,7 @@ resource "google_container_node_pool" "cheap_pool" {
   lifecycle {
     ignore_changes = [
       node_count,
+      # 🔥 CRITICAL FIXES
       node_config[0].resource_labels,
       node_config[0].kubelet_config,
     ]
