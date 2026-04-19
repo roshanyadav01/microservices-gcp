@@ -74,6 +74,11 @@ jobs:
           gcloud artifacts repositories list --location=us-central1
           TOKEN=$(gcloud auth print-access-token)
           curl -s https://oauth2.googleapis.com/tokeninfo?access_token=$TOKEN | grep email
+
+      - name: Docker auth (WIF-safe)
+        run: |
+          gcloud auth print-access-token | \
+          docker login -u oauth2accesstoken --password-stdin https://$REGION-docker.pkg.dev
           docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
 
   deploy:
