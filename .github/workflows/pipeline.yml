@@ -12,7 +12,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
   REGION: us-central1
-  ZONE: us-central1-b
+  ZONE: us-central1-a
   CLUSTER_NAME: microservices-cluster
   REPO: microservices
 
