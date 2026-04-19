@@ -62,7 +62,7 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - run: gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+      - run: gcloud auth configure-docker $REGION-docker.pkg.dev
 
       - run: |
           docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }} ./services/${{ matrix.service }}
@@ -72,6 +72,8 @@ jobs:
           gcloud config list
           echo "---- ACCESS TEST ----"
           gcloud artifacts repositories list --location=us-central1
+          TOKEN=$(gcloud auth print-access-token)
+          curl -s https://oauth2.googleapis.com/tokeninfo?access_token=$TOKEN | grep email
           docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
 
   deploy:
