@@ -45,7 +45,7 @@ resource "google_project_iam_member" "roles" {
     "roles/artifactregistry.writer",
     "roles/storage.admin",
     "roles/viewer",
-    "roles/am.serviceAccountAdmin"
+    "roles/iam.serviceAccountAdmin"
   ])
 
   project = var.project_id
