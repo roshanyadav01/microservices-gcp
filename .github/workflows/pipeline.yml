@@ -62,24 +62,12 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - run: gcloud auth configure-docker $REGION-docker.pkg.dev
+      - run: gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
 
       - run: |
-          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }} ./services/${{ matrix.service }}
-          echo "---- AUTH LIST ----"
-          gcloud auth list
-          echo "---- CONFIG ----"
-          gcloud config list
-          echo "---- ACCESS TEST ----"
-          gcloud artifacts repositories list --location=us-central1
-          TOKEN=$(gcloud auth print-access-token)
-          curl -s https://oauth2.googleapis.com/tokeninfo?access_token=$TOKEN | grep email
-
-      - name: Docker auth (WIF-safe)
-        run: |
-          gcloud auth print-access-token | \
-          docker login -u oauth2accesstoken --password-stdin https://$REGION-docker.pkg.dev
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
+          IMAGE_NAME=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
+          docker build -t $IMAGE_NAME ./services/${{ matrix.service }}
+          docker push $IMAGE_NAME
 
   deploy:
     needs: build

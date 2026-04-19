@@ -52,9 +52,10 @@ resource "google_project_iam_member" "roles" {
   member  = "serviceAccount:${google_service_account.sa.email}"
 }
 
+data "google_project" "current" {}
+
 resource "google_service_account_iam_member" "binding" {
   service_account_id = google_service_account.sa.id
   role               = "roles/iam.workloadIdentityUser"
-  #member = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
-  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
+  member = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.pool.workload_identity_pool_id}/attribute.repository/${var.github_repo}"
 }
