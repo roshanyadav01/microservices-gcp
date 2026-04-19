@@ -68,7 +68,7 @@ jobs:
           docker login -u oauth2accesstoken --password-stdin https://$REGION-docker.pkg.dev
 
       - run: |
-          IMAGE_NAME=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
+          IMAGE_NAME=$REGION-docker.pkg.dev/dev-683008/$REPO/${{ matrix.service }}:${{ github.sha }}
           docker build -t $IMAGE_NAME ./services/${{ matrix.service }}
           docker push $IMAGE_NAME
 
