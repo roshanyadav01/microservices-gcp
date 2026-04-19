@@ -32,6 +32,11 @@ module "gke" {
   region     = var.region
   network    = module.network.network_name
   subnetwork = module.network.subnet_name
+  depends_on = [
+    module.network,
+    module.artifact,
+    module.wif
+  ]
 }
 
 module "wif" {

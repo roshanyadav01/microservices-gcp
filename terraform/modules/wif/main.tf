@@ -52,7 +52,8 @@ resource "google_project_iam_member" "roles" {
     "roles/artifactregistry.writer",
     "roles/storage.admin",
     "roles/viewer",
-    "roles/iam.serviceAccountUser"
+    "roles/iam.serviceAccountUser",
+    "roles/resourcemanager.projectIamAdmin"
   ])
 
   project = var.project_id
