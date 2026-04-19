@@ -1,11 +1,11 @@
 resource "google_iam_workload_identity_pool" "pool" {
-  workload_identity_pool_id = "github-pool1"
+  workload_identity_pool_id = "github-pool0"
   depends_on                = [google_project_service.services]
 }
 
 resource "google_iam_workload_identity_pool_provider" "provider" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
-  workload_identity_pool_provider_id = "github-provider1"
+  workload_identity_pool_provider_id = "github-provider0"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -37,13 +37,6 @@ resource "google_project_service" "services" {
   project = var.project_id
   service = each.key
   disable_on_destroy = false
-}
-
-resource "google_artifact_registry_repository_iam_member" "writer" {
-  location   = "us-central1"
-  repository = "microservices"
-  role       = "roles/artifactregistry.writer"
-  member     = "serviceAccount:${google_service_account.sa.email}"
 }
 
 resource "google_project_iam_member" "roles" {

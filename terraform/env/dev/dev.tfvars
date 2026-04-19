@@ -1,4 +1,5 @@
 project_id  = "dev-683008"
 region      = "us-central1"
+zone        = "us-central1-a"
 github_repo = "roshanyadav01/microservices-gcp"
 project_number = "821409317899"

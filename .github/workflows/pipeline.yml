@@ -12,6 +12,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
   REGION: us-central1
+  ZONE: us-central1-b
   CLUSTER_NAME: microservices-cluster
   REPO: microservices
 
@@ -94,7 +95,7 @@ jobs:
       - uses: google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: ${{ env.CLUSTER_NAME }}
-          location: ${{ env.REGION }}
+          location: ${{ env.ZONE }}
 
       - run: |
           helm upgrade --install ${{ matrix.service }} ./helm/${{ matrix.service }} \

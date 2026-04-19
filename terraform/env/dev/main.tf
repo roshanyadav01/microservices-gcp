@@ -15,21 +15,29 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
+  zone = var.zone
 }
 
 module "network" {
   source = "../../modules/network"
   region = var.region
+  depends_on = [
+    module.wif
+  ]
 }
 
 module "artifact" {
   source = "../../modules/artifacts"
   region = var.region
+  depends_on = [
+    module.wif
+  ]
 }
 
 module "gke" {
   source     = "../../modules/gke"
   region     = var.region
+  zone       = var.zone
   network    = module.network.network_name
   subnetwork = module.network.subnet_name
   depends_on = [

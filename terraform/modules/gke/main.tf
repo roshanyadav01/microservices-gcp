@@ -1,6 +1,6 @@
 resource "google_container_cluster" "gke" {
   name     = "microservices-cluster"
-  location = "us-central1-b"
+  location = var.zone
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -10,16 +10,16 @@ resource "google_container_cluster" "gke" {
 
   ip_allocation_policy {}
 
-  node_config {
-    machine_type = "e2-small"
-    disk_size_gb = 30   # 👈 critical fix
+  lifecycle {
+    prevent_destroy = true
   }
+
 }
 
 resource "google_container_node_pool" "cheap_pool" {
   name     = "cheap-pool"
   cluster  = google_container_cluster.gke.name
-  location = "us-central1-b"
+  location = var.zone
 
   node_count = 1
 
