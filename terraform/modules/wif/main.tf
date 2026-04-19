@@ -45,7 +45,7 @@ resource "google_project_iam_member" "roles" {
     "roles/artifactregistry.writer",
     "roles/storage.admin",
     "roles/viewer",
-    "iam.serviceAccountAdmin"
+    "roles/am.serviceAccountAdmin"
   ])
 
   project = var.project_id
@@ -56,5 +56,6 @@ resource "google_project_iam_member" "roles" {
 resource "google_service_account_iam_member" "binding" {
   service_account_id = google_service_account.sa.id
   role               = "roles/iam.workloadIdentityUser"
-  member = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
+  #member = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
 }
