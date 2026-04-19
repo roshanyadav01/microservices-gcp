@@ -66,6 +66,12 @@ jobs:
 
       - run: |
           docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }} ./services/${{ matrix.service }}
+          echo "---- AUTH LIST ----"
+          gcloud auth list
+          echo "---- CONFIG ----"
+          gcloud config list
+          echo "---- ACCESS TEST ----"
+          gcloud artifacts repositories list --location=us-central1
           docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }}:${{ github.sha }}
 
   deploy:
