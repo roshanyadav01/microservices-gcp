@@ -20,7 +20,8 @@ resource "google_container_cluster" "gke" {
 
     # Ignore fields that commonly drift
     ignore_changes = [
-      initial_node_count
+      initial_node_count,
+      node_config,
     ]
   }
 }
@@ -56,7 +57,9 @@ resource "google_container_node_pool" "cheap_pool" {
 
   lifecycle {
     ignore_changes = [
-      node_count
+      node_count,
+      node_config[0].resource_labels,
+      node_config[0].kubelet_config,
     ]
   }
 }
