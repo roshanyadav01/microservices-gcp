@@ -98,7 +98,7 @@ jobs:
           location: ${{ env.ZONE }}
 
       - run: |
-          helm upgrade --install ${{ matrix.service }} ./helm/${{ matrix.service }}/templates/chart.yaml \
+          helm upgrade --install ${{ matrix.service }} ./helm/${{ matrix.service }}/chart.yaml \
             --set image.repository=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }} \
             --set image.tag=${{ github.sha }} \
             --namespace dev --create-namespace
