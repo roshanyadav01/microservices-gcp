@@ -98,7 +98,7 @@ jobs:
           location: ${{ env.ZONE }}
 
       - run: |
-          helm upgrade --install ${{ matrix.service }} ./microservices-gcp/helm/${{ matrix.service }} \
+          helm upgrade --install ${{ matrix.service }} ./microservices-gcp/helm/${{ matrix.service }}/templates/chart.yaml \
             --set image.repository=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/${{ matrix.service }} \
             --set image.tag=${{ github.sha }} \
             --namespace dev --create-namespace
